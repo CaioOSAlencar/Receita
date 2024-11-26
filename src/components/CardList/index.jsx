@@ -1,33 +1,32 @@
-'use client'
+"use client"
+import { useEffect, useState } from "react";
+import Cartao from "../Card";
 
-import { useState } from "react";
-import Card from "../Card";
+export default function CardList() {
 
-export default function CardList(){
-    
-    const [cards, setCards] = useState([
-        {id: 1, titulo: "ovo com Arroz e pepipo",   imagem: "Ovo-pepino.png", tempo: 25, server: 2},
-        {id: 2, titulo: "ovo mexido",               imagem: "Ovo-pepino.png", tempo: 20, server: 2},
-        {id: 3, titulo: "ovo com macarrão",         imagem: "Ovo-pepino.png", tempo: 25, server: 1},
-        {id: 4, titulo: "Pão com ovo",              imagem: "Ovo-pepino.png", tempo: 25, server: 1}
-    ])
-    
+    const [cards, setCards] = useState([])
+
+    useEffect(() => {
+        const bearerToken = process.env.NEXT_PUBLIC_API_TOKEN; 
+
+        async function getData() {
+            await fetch('http://localhost:1337/api/receitas?populate=*', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${bearerToken}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json(response))
+            .then(response => setCards(response.data))
+            .catch(error => console.log(error));
+        }
+        getData();
+    }, [])
+
     return(
-        <div className="flex flex-wrap flex-col m-8">
-            <div>Quantidade de receitas: {cards.length}</div>
-            
-            <div className="flex flex-wrap">
-                    {cards.map(c => (
-                        <Card 
-                        key={c.id}
-                        imagem={c.imagem}
-                        titulo={c.titulo}
-                        tempo={c.tempo}
-                        serve={c.serve}
-                        />
-                    ))}
-            </div>
-
+        <div className="flex flex-wrap w-full justify-center">
+            {cards.map((e) => <Card key={e.id} props={e} />)}
         </div>
-    )
+    );
 }
